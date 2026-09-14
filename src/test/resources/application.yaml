@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: mybatis-sns
+  # 데이터베이스 접속 정보
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: 'jdbc:mysql://localhost:3306/sns_db?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true'
+    username: sns-app
+    password: Sns1234!
+
+# 데이터베이스 초기화 설정 (애플리케이션 구동 시 schema.sql 및 data.sql 자동 실행)
+  sql:
+    init:
+       mode: never
+
+# MyBatis 설정
+mybatis:
+  # 1. MyBatis 매퍼 XML 파일 위치 지정 (경로 패턴, classpath:resources폴더)
+  mapper-locations: classpath:mapper/**/*.xml
+  # 2. DTO 패키지 별칭 지정 (XML에서 패키지 경로 생략 가능)
+  type-aliases-package: net.likelion.bebc25.sns.dto
+  configuration:
+    # 3. DB 스네이크 케이스 컬럼명을 자바 카멜 케이스 필드명으로 자동 매핑
+    map-underscore-to-camel-case: true
+    # 4. 콘솔에 실행 SQL 및 파라미터 바인딩 로그 출력 (개발/디버깅용)
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jwt:
+  # Base64로 인코딩된 최소 256비트(32바이트) 이상의 보안 비밀키
+  secret: dGhpc2lzbXlzZWNyZXRrZXlmb3Jqd3R0b2tlbnNpZ25hdHVyZXZhbGlkYXRpb24xMjM0NTY3ODkwIQ==
+  access-token-expiration: 3600000      # 액세스 토큰 만료 시간 1시간 (밀리초 단위)
+  refresh-token-expiration: 604800000   # 리프레쉬 토큰 만료 시간 7일 (밀리초 단위)
