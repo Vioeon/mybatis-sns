@@ -1,5 +1,8 @@
-### OAuth Secret ###
-application-oauth.yaml
+**/*.pem
+
+# 환경 변수 및 시크릿 파일 유출 차단
+.env*
+!.env.example
 
 HELP.md
 .gradle
