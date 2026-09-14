@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthRestController {
+public class AuthRestController2 {
 
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
