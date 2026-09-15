@@ -67,7 +67,7 @@ class PostServiceTest {
         PostUpdateRequest updateDto = new PostUpdateRequest("수정된 비즈니스 본문 내용", "https://image.com/updated.jpg");
 
         // when
-        postService.updatePostd(postId, updateDto);
+        postService.updatePost(postId, updateDto);
         PostResponse updatedPost = postService.getPostById(postId);
 
         // then
