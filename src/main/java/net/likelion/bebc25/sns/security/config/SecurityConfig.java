@@ -88,7 +88,7 @@ public class SecurityConfig {
 
                 // URL 엔드포인트별 기본 접근 인가 설정 (화이트 리스트 방식)
                 .authorizeHttpRequests(auth -> auth
-                        // 소셜 로그인 테스트용
+                        // 소셜 로그인 테스트 용
                         .requestMatchers("/login.html", "/favicon.ico", "/oauth/**").permitAll()
 
                         // 게시글 목록 및 상세 조회(GET)는 비로그인 사용자에게도 공개 허용
