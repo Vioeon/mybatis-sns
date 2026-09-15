@@ -54,7 +54,7 @@ class PostServiceTest {
         assertThat(detail).isNotNull();
         assertThat(detail.getId()).isEqualTo(postId);
         assertThat(detail.getAuthor()).isNotNull();
-//        assertThat(detail.getAuthor().nickname()).isEqualTo("hong");
+//        assertThat(detail.getAuthor().nickname()).isEqualTo("hong") ;
         assertThat(detail.getComments()).hasSize(3);
     }
 
