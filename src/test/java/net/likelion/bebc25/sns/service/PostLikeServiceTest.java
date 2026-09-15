@@ -9,83 +9,78 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
 @Transactional
 public class PostLikeServiceTest {
+
     @Autowired
     private PostLikeService postLikeService;
 
-    @Autowired
+    // 실제 PostMapper의 동작은 유지되지만 필요하다면 특정 메서드만 모킹해서 강제 예외를 발생시킬수 있음
+    @MockitoSpyBean
     private PostMapper postMapper;
 
-    //실제 PostMapper의 동작은 유지되지만 필요하다면 특정 메서드만 모킹(가짜생성)해서 강제 예외 발생가능
-    @MockitoSpyBean
+    @Autowired
     private PostLikeMapper postLikeMapper;
 
-
     @Test
-    @DisplayName("좋아요 토글, 카운트 증감 테스트")
+    @DisplayName("좋아요 토글, 카운트 수 변경 테스트")
     void toggleLikeAddTest(){
-        // given : 1번 회원이 2번 게시글에 대해 좋아요 시도 (미등록 상태)
+        // given: 1번 회원이 2번 게시글에 좋아요 시도
         Long memberId = 1L;
-        Long postId = 3L;
+        Long postId = 2L;
 
-        // 이전 좋아요 개수
         PostResponse beforePost = postMapper.findById(postId);
         int beforeLikeCount = beforePost.likeCount();
-        // 1 : 등록상태, 0 : 미등록상태
         boolean beforeLiked = postLikeMapper.countLike(memberId, postId) > 0;
 
-        // when : 좋아요 토글
-        LikeToggleResponse result = postLikeService.toggleLike(memberId,postId);
-        System.out.println("좋아요 유무 : " + result.liked() + ", 총 좋아요 수 : " + result.likeCount());
+        // when: 좋아요 토글
+        LikeToggleResponse result = postLikeService.toggleLike(memberId, postId);
 
         // then
         PostResponse afterPost = postMapper.findById(postId);
         boolean afterLiked = postLikeMapper.countLike(memberId, postId) > 0;
-
-        if(beforeLiked){ // 토글 이전에 좋아요 상태일 경우, 토글 이후에 좋아요 상태 : false, 좋아요수 -1
+        if(beforeLiked){ // 토글 이전에 좋아요 상태일 경우라면 토글 이후에는 좋아요 상태가 아니고 좋아요 수는 -1이 되어야 함
             assertThat(result.liked()).isFalse();
             assertThat(result.likeCount()).isEqualTo(beforeLikeCount - 1);
             assertThat(afterLiked).isFalse();
-
             assertThat(afterPost.likeCount()).isEqualTo(beforeLikeCount - 1);
-        }else{ // 토글 이전에 좋아요 미등록 상태일 경우, 토글 이후에 좋아요 상태 : true, 좋아요수 +1
+        }else{ // 토글 이전에 좋아요 상태가 아닌 경우라면 토글 이후에는 좋아요 상태가 되고 좋아요 수는 +1이 되어야 함
             assertThat(result.liked()).isTrue();
             assertThat(result.likeCount()).isEqualTo(beforeLikeCount + 1);
             assertThat(afterLiked).isTrue();
-
             assertThat(afterPost.likeCount()).isEqualTo(beforeLikeCount + 1);
         }
     }
 
     @Test
-    @DisplayName("좋아요 토글, 카운트 수 변경 중 예외 발생 테스트")
-    void toggleLikeRollbackTest(){ // 하나 성공, 하나 실패 시 정상적으로 롤백되는지
-        // given : 1번 회원이 2번 게시글에 대해 좋아요 시도 (미등록 상태)
+    @DisplayName("좋아요 토글, 카운트 수 변경 중 예외 발생시 롤백 테스트")
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void toggleLikeRollbackTest(){
+        // given: 1번 회원이 2번 게시글에 좋아요 시도
         Long memberId = 1L;
         Long postId = 2L;
-        postLikeMapper.insertLike(memberId, postId);
 
-        boolean beforeLiked = postLikeMapper.countLike(memberId, postId) > 0;
-
+        // 좋아요가 되어 있었다면 삭제하고 시작
         postLikeMapper.deleteLike(memberId, postId);
 
-//        postMapper.increaseLikeCount(postId); // 정상실행
+        // postMapper.increaseLikeCount(postId); // 정상 실행
 
-        // 예외 발생 시킴.
         doThrow(new RuntimeException("데이터베이스 네트워크 장애 발생"))
                 .when(postMapper).increaseLikeCount(postId);
 
-        //        postMapper.increaseLikeCount(postId); // 예외 발생
+        // postMapper.increaseLikeCount(postId); // 예외 발생
 
-        // when : 좋아요 토글
-        LikeToggleResponse result = postLikeService.toggleLike(memberId,postId);
+        // when: 좋아요 토글
+        assertThatThrownBy(() -> postLikeService.toggleLike(memberId, postId))
+                .isInstanceOf(RuntimeException.class);
 
         boolean liked = postLikeMapper.countLike(memberId, postId) > 0;
         assertThat(liked).isFalse();

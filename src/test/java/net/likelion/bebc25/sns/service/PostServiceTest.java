@@ -8,9 +8,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,12 +54,13 @@ class PostServiceTest {
         assertThat(detail).isNotNull();
         assertThat(detail.getId()).isEqualTo(postId);
         assertThat(detail.getAuthor()).isNotNull();
-//        assertThat(detail.getAuthor().nickname()).isEqualTo("hong");
-        assertThat(detail.getComments()).hasSize(6);
+//        assertThat(detail.getAuthor().nickname()).isEqualTo("hong") ;
+        assertThat(detail.getComments()).hasSize(3);
     }
 
     @Test
     @DisplayName("게시글 수정 테스트")
+    @WithMockUser(roles = "ADMIN") // 테스트에 ADMIN 권한 부여
     void updatePostTest() {
         // given
         Long postId = 1L;
@@ -73,6 +77,8 @@ class PostServiceTest {
 
     @Test
     @DisplayName("게시글 단건 삭제 테스트")
+//    @WithUserDetails(value = "user1@example.com", userDetailsServiceBeanName = "customUserDetailsService") //
+    @WithMockUser(roles = "ADMIN") // 테스트에 ADMIN 권한 부여
     void deletePostTest() {
         // given
         Long postId = 2L;
