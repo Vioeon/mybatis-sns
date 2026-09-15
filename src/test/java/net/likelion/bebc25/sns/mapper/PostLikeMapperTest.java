@@ -20,7 +20,7 @@ public class PostLikeMapperTest {
     void insertAndCountLikeTest(){
         // given 1번 회원이 3번 게시글에 좋아요 등록
         Long memberId = 1L;
-        Long postId = 3L;
+        Long postId = 2L;
 
         // when 좋아요 이전/이후의 카운트 조회
         int beforeCount = postLikeMapper.countLike(memberId, postId);
@@ -38,6 +38,7 @@ public class PostLikeMapperTest {
         // given 1번 회원이 2번 게시글의 좋아요 취소
         Long memberId = 1L;
         Long postId = 2L;
+        postLikeMapper.insertLike(memberId,postId);
 
         // when 좋아요 취소 이전/이후의 카운트 조회
         int beforeCount = postLikeMapper.countLike(memberId, postId);
