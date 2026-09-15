@@ -44,7 +44,7 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 상세 복합 조인 조회 테스트")
     void getPostDetailByIdTest() {
-        // given: data.sql의 1번 게시글 (작성자: 1번 회원, 댓글: 3건 등록);
+        // given: data.sql의 1번 게시글 (작성자: 1번 회원, 댓글: 3건 등록)
         Long postId = 1L;
 
         // when
